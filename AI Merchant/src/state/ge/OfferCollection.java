@@ -1,5 +1,7 @@
 package state.ge;
 
+import state.ge.items.ItemSet;
+
 public class OfferCollection {
     private int gold;
     private ItemSet items;

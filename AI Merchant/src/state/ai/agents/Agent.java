@@ -1,10 +1,17 @@
 package state.ai.agents;
 
+import org.dreambot.api.Client;
 import org.dreambot.api.methods.MethodProvider;
 
+import org.dreambot.api.methods.container.impl.Inventory;
 import services.PriceChecker;
+import services.PriceCheckerEndpoint;
 import state.ai.Actionable;
+import state.ai.item_strategies.ItemStrategy;
+import state.ai.item_strategies.PriceCheckerItemStrategy;
 import state.ge.*;
+import state.ge.items.Item;
+import state.ge.items.ItemRestrictions;
 
 import java.util.*;
 
@@ -14,37 +21,54 @@ import java.util.*;
  */
 public abstract class Agent implements Actionable {
 
-    protected GrandExchange ge;
+    protected GrandExchangeInterface ge;
+    private PriceChecker pc = new PriceChecker(PriceCheckerEndpoint.GE_TRACKER);
 
-    Map<Item, Actionable> itemStrategies;
-
-    private int availableGold;
-    private PriceChecker pc;
     private Queue<Item> itemQueue;
-    private Set<Flip> buyingFlips = new HashSet<>();
-    private Set<Flip> sellingFlips = new HashSet<>();
+    Map<Item, ItemStrategy> itemStrategies = new HashMap<>();
+    private Map<Item, ItemRestrictions> itemRestrictions = new HashMap<>();
+
+    private Map<Flip, Integer> buyingFlips = new HashMap<>();
+    private Map<Flip, Integer> sellingFlips = new HashMap<>();
     private Set<Flip> completedFlips = new HashSet<>();
 
-    public Agent(GrandExchange ge, Queue<Item> itemList, int availableGold, PriceChecker pc) {
+    public Agent(GrandExchangeInterface ge, Queue<Item> itemQueue, Map<Item, ItemRestrictions> itemRestrictions,
+                 PriceChecker pc, Map<Item, ItemStrategy> itemStrategies) {
         this.ge = ge;
-        this.itemQueue = itemList;
-        this.availableGold = availableGold;
+        this.itemQueue = itemQueue;
         this.pc = pc;
+        for(Item item : itemQueue) {
+            if(itemRestrictions.containsKey(item)) {
+                this.itemRestrictions.put(item, itemRestrictions.get(item));
+            } else {
+                this.itemRestrictions.put(item, new ItemRestrictions());
+            }
+            if(itemStrategies.containsKey(item)) {
+                this.itemStrategies.put(item, itemStrategies.get(item));
+            } else {
+                this.itemStrategies.put(item, new PriceCheckerItemStrategy(this, item, 1.5, 0.5));
+            }
+        }
     }
 
     // Get queue of items waiting to be flipped
-    protected Queue<Item> getWaitingItemQueue() {
+    public Queue<Item> getWaitingItemQueue() {
         Queue<Item> waitingItems = new LinkedList<>(itemQueue);
-        for(Flip flip : buyingFlips) {
-            waitingItems.remove(flip.getItemSet().getItem());
-        }
-        for(Flip flip : sellingFlips) {
-            waitingItems.remove(flip.getItemSet().getItem());
+        Map<Flip, Integer> allFlips = new HashMap<>(buyingFlips);
+        allFlips.putAll(sellingFlips);
+        for(Map.Entry<Flip, Integer> entry : allFlips.entrySet()) {
+            if(!ge.offerIsCompleted(entry.getValue())) {
+                waitingItems.remove(entry.getKey().getItemSet().getItem());
+            }
         }
         for(Item waitingItem : waitingItems) {
-            if(ge.getAvailableItemAmount(waitingItem) == 0) {
+            if(ge.getAvailableItemAmount(waitingItem) == 0 || itemRestrictions.get(waitingItem).isBadItem()) {
                 waitingItems.remove(waitingItem);
             }
+        }
+        MethodProvider.log("Waiting item queue:");
+        for(Item item : waitingItems) {
+            MethodProvider.log(item.getItemName());
         }
         return waitingItems;
     }
@@ -58,64 +82,43 @@ public abstract class Agent implements Actionable {
      * User can specify which items they would like to check price of, along with a maximum and minimum check
      * value.
     */
-    public Margin checkMarginsOnGe(Item item) {
-        int priceEstimate = pc.getCurrentPriceEstimate(item);
-        double buyMultiplier = 1.05;
-        double sellMultiplier = 0.95;
-        Flip marginTestFlip = new Flip(new ItemSet(item, 1), (int) (priceEstimate * 1.05), (int) (priceEstimate * 0.95));
-        do {
-            ge.placeBuyOffer(marginTestFlip);
-            MethodProvider.sleep(2000); // TODO: Implement properly lol
-            buyMultiplier += 0.05;
-            marginTestFlip.setBuyPrice((int) (priceEstimate * buyMultiplier));
-        } while(!ge.offerIsCompleted(marginTestFlip));
-        OfferCollection buyCollection = ge.collectOffer(marginTestFlip);
-        do {
-            ge.placeSellOffer(marginTestFlip);
-            MethodProvider.sleep(2000); // TODO: Implement properly lol
-            sellMultiplier -= 0.05;
-            marginTestFlip.setSellPrice((int) (priceEstimate * sellMultiplier));
-        } while(!ge.offerIsCompleted(marginTestFlip));
-        OfferCollection sellCollection = ge.collectOffer(marginTestFlip);
-        // TODO: Implement
-        return null;
-    }
+    // TODO: Majorly improve lol
 
     // Place new buy offer for given flip.
     public void placeFlipBuyOffer(Flip flip) {
-        ge.placeBuyOffer(flip);
+        MethodProvider.log("Attempting to make flip buy offer...");
+        int slot = ge.placeBuyOffer(flip);
         flip.setBuyOfferPlacedAt(System.currentTimeMillis());
         flip.setStatus(FlipStatus.BUYING);
-        buyingFlips.add(flip);
-        availableGold -= flip.getBuyPrice();
+        buyingFlips.put(flip, slot);
     }
 
     // Place new sell offer for given flip.
     public void placeFlipSellOffer(Flip flip) {
-        ge.placeSellOffer(flip);
+        int slot = ge.placeSellOffer(flip);
         flip.setSellOfferPlacedAt(System.currentTimeMillis());
         flip.setStatus(FlipStatus.SELLING);
-        sellingFlips.add(flip);
+        sellingFlips.put(flip, slot);
     }
 
     // Collect finished buying flip. Assumes offer is finished.
-    public void collectFinishedBuyingFlip(Flip flip) {
-        OfferCollection collection = ge.collectOffer(flip);
+    public OfferCollection collectFinishedBuyingFlip(Flip flip) {
+        OfferCollection collection = ge.collectOffer(buyingFlips.get(flip));
         flip.setBuyPrice(flip.getBuyPrice() - collection.getGold() / collection.getItems().getItemAmount());
         flip.setStatus(FlipStatus.BOUGHT);
         buyingFlips.remove(flip);
-        availableGold += collection.getGold();
+        return collection;
     }
 
     // Collect finished selling flip. Assumes offer is finished.
-    public void collectFinishedSellingFlip(Flip flip) {
-        OfferCollection collection = ge.collectOffer(flip);
-        flip.setSellPrice(collection.getGold() / collection.getItems().getItemAmount());
+    public OfferCollection collectFinishedSellingFlip(Flip flip) {
+        OfferCollection collection = ge.collectOffer(buyingFlips.get(flip));
+        flip.setSellPrice(collection.getGold() / flip.getItemSet().getItemAmount());
         flip.setFlipCompletedAt(System.currentTimeMillis());
         flip.setStatus(FlipStatus.COMPLETED);
         sellingFlips.remove(flip);
         completedFlips.add(flip);
-        availableGold += collection.getGold();
+        return collection;
     }
 
     /*
@@ -134,8 +137,8 @@ public abstract class Agent implements Actionable {
      *           take next.
      */
     public Flip cancelOffer(Flip flip) {
-        OfferCollection collection = ge.collectOffer(flip);
-        if(buyingFlips.contains(flip)) {
+        if(buyingFlips.keySet().contains(flip)) {
+            OfferCollection collection = ge.collectOffer(buyingFlips.get(flip));
             flip.setItemSet(collection.getItems());
             int offerPrice = flip.getBuyPrice() * flip.getItemSet().getItemAmount();
             int actualBuyValue = offerPrice - collection.getGold();
@@ -145,7 +148,8 @@ public abstract class Agent implements Actionable {
             buyingFlips.remove(flip);
 
             return flip;
-        } else if(sellingFlips.contains(flip)) {
+        } else if(sellingFlips.keySet().contains(flip)) {
+            OfferCollection collection = ge.collectOffer(sellingFlips.get(flip));
             int sellPrice = (flip.getItemSet().getItemAmount() - collection.getItems().getItemAmount()) / collection.getGold();
             Flip completedFlip = new Flip(collection.getItems(), flip.getBuyPrice(), sellPrice);
             completedFlip.setFlipCompletedAt(System.currentTimeMillis());
@@ -162,36 +166,28 @@ public abstract class Agent implements Actionable {
         return null;
     }
 
+    public Flip getFlipInSlot(int slot) {
+        Map<Flip, Integer> allFlips = new HashMap<>(buyingFlips);
+        allFlips.putAll(sellingFlips);
+        for(Map.Entry<Flip, Integer> entry : allFlips.entrySet()) {
+            if(entry.getValue() == slot) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
+    public ItemRestrictions getItemRestrictions(Item item) {
+        return itemRestrictions.get(item);
+    }
+
     public int getAvailableGold() {
-        return availableGold;
+        return new Inventory(Client.getClient()).count(995);
     }
 
-    public void setAvailableGold(int availableGold) {
-        this.availableGold = availableGold;
-    }
-
-    public Set<Flip> getBuyingFlips() {
-        return buyingFlips;
-    }
-
-    public Set<Flip> getSellingFlips() {
-        return sellingFlips;
-    }
-
-    public Set<Flip> getCompletedFlips() {
-        return completedFlips;
-    }
-
-    public Map<Item, Actionable> getItemStrategies() {
-        return itemStrategies;
-    }
-
-    public PriceChecker getPc() {
-        return pc;
-    }
-
-    public GrandExchange getGe() {
+    public GrandExchangeInterface getGe() {
         return ge;
     }
+
 
 }

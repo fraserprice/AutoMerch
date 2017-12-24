@@ -1,11 +1,11 @@
 package services;
 
 import javafx.util.Pair;
-import state.ge.Item;
+import state.ge.items.Item;
 
 public class PriceChecker {
-    private final PriceCheckerEndpoint endpoint;
-    private final String endpointUrl;
+    private PriceCheckerEndpoint endpoint;
+    private String endpointUrl = "";
 
     public PriceChecker(PriceCheckerEndpoint endpoint) {
         this.endpoint = endpoint;
@@ -13,7 +13,6 @@ public class PriceChecker {
     }
 
     public int getCurrentPriceEstimate(Item item) {
-        // TODO: Make call to endpoint
         return 0;
     }
 

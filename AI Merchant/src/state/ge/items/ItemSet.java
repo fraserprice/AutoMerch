@@ -1,4 +1,4 @@
-package state.ge;
+package state.ge.items;
 
 /**
  * Class designed to deal with stacks of the same item bought for specific price

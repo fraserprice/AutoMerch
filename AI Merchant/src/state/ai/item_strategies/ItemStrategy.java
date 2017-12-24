@@ -1,21 +1,28 @@
 package state.ai.item_strategies;
 
+import org.dreambot.api.methods.MethodProvider;
 import state.ai.Actionable;
 import state.ai.agents.Agent;
 import state.ge.*;
+import state.ge.items.Item;
+import state.ge.items.ItemSet;
 
 public abstract class ItemStrategy implements Actionable {
 
     protected final Agent agent;
     protected Item item;
-    protected GrandExchange ge;
+    protected GrandExchangeInterface ge;
     protected Flip currentFlip;
+    protected Margin itemMargin = new Margin();
+
+    protected boolean upperMarginCheckInProgress = false;
+    protected boolean lowerMarginCheckInProgress = false;
 
     public ItemStrategy(Agent agent, Item item) {
         this.agent = agent;
         this.item = item;
         this.ge = agent.getGe();
-        this.currentFlip = ge.getOngoingFlip(item);
+        this.currentFlip = agent.getFlipInSlot(ge.getItemSlot(item));
     }
 
     /*
@@ -25,11 +32,12 @@ public abstract class ItemStrategy implements Actionable {
      */
     @Override
     public boolean performAction() {
-        currentFlip = ge.getOngoingFlip(item);
+        int itemSlot = ge.getItemSlot(item);
+        currentFlip = agent.getFlipInSlot(itemSlot);
 
         if(currentFlip != null) {
             FlipStatus flipStatus = currentFlip.getStatus();
-            if(ge.offerIsCompleted(currentFlip)) {
+            if(ge.offerIsCompleted(itemSlot)) {
                 if(flipStatus == FlipStatus.SELLING) {
                     return collectFinishedSell();
                 } else if(flipStatus == FlipStatus.BUYING) {
@@ -48,11 +56,23 @@ public abstract class ItemStrategy implements Actionable {
                     }
                 }
             }
-        } else if(ge.availableSlotCount() > 0 && ge.getAvailableItemAmount(item) > 0) {
-            return commenceFlip();
+        } else if((ge.getAvailableItemAmount(item) > 0 || ge.getAvailableItemAmount(item) == -1)
+                && !agent.getItemRestrictions(item).isBadItem()) {
+            MethodProvider.log(Boolean.toString(itemMargin.maximumValid()));
+            if(ge.availableSlotCount() > 0 && itemMargin.minimumValid() && itemMargin.maximumValid()) {
+                return commenceFlip();
+            }
+            if(!itemMargin.maximumValid() && ge.availableSlotCount() > 0
+                    || upperMarginCheckInProgress) {
+                MethodProvider.log("CHECK UPPER");
+                return checkUpperMargin();
+            }
+            if(!itemMargin.minimumValid() && ge.availableSlotCount() > 0
+                    || lowerMarginCheckInProgress) {
+                MethodProvider.log("CHECK LOWER");
+                return checkLowerMargin();
+            }
         }
-
-
         return false;
     }
 
@@ -60,11 +80,17 @@ public abstract class ItemStrategy implements Actionable {
      * Utility functions to reduce duplication
      */
 
-    protected boolean placeOffer(Margin margin) {
-        int availableGoldPerFlip = agent.getAvailableGold() / ge.availableSlotCount();
-        if(margin.getMinimum() < availableGoldPerFlip) {
-            ItemSet itemSet = new ItemSet(item, availableGoldPerFlip / margin.getMinimum());
-            Flip newFlip = new Flip(itemSet, margin.getMinimum(), margin.getMaximum());
+    protected boolean placeOffer() {
+        MethodProvider.log("Attempting to make new flip offer...");
+        int availableSlots = ge.availableSlotCount();
+        int waitingQueueSize = agent.getWaitingItemQueue().size();
+        int availableGold = agent.getAvailableGold();
+        int goldPerSlot = availableSlots == 0 ? 0 : availableGold / availableSlots;
+        int goldPerQueueItem = waitingQueueSize == 0 ? 0 : availableGold / waitingQueueSize;
+        int availableGoldPerFlip = Math.max(goldPerQueueItem, goldPerSlot);
+        if(itemMargin.getMinimum() < availableGoldPerFlip && itemMargin.getMinimum() > 0) {
+            ItemSet itemSet = new ItemSet(item, availableGoldPerFlip / itemMargin.getMinimum());
+            Flip newFlip = new Flip(itemSet, itemMargin.getMinimum(), itemMargin.getMaximum());
             agent.placeFlipBuyOffer(newFlip);
             return true;
         }
@@ -77,8 +103,16 @@ public abstract class ItemStrategy implements Actionable {
      * the given sub-strategy (e.g. cannot find suitable margins and so do not commence flip).
      */
 
+    // Check upper margin if not currently valid
+    protected abstract boolean checkUpperMargin();
+
+    // Check lower margin if not currently valid
+    protected abstract boolean checkLowerMargin();
+
     // Place buy offer for item. Margins should be decided by specific policy.
-    protected abstract boolean commenceFlip();
+    protected boolean commenceFlip() {
+        return placeOffer();
+    }
 
     // Cancel sell offer due to timeout. Policy should then deal with any items which were not successfully sold.
     protected abstract boolean sellTimeout();

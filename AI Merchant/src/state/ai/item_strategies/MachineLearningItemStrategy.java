@@ -2,12 +2,21 @@ package state.ai.item_strategies;
 
 import state.ai.Actionable;
 import state.ai.agents.Agent;
-import state.ge.Item;
+import state.ge.items.Item;
 
 class MachineLearningItemStrategy extends ItemStrategy implements Actionable {
-
     public MachineLearningItemStrategy(Agent agent, Item item) {
         super(agent, item);
+    }
+
+    @Override
+    protected boolean checkUpperMargin() {
+        return false;
+    }
+
+    @Override
+    protected boolean checkLowerMargin() {
+        return false;
     }
 
     @Override

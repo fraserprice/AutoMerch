@@ -1,5 +1,7 @@
 package state.ge;
 
+import state.ge.items.ItemSet;
+
 public class Flip {
     private FlipStatus status;
     private ItemSet itemSet;
@@ -31,6 +33,14 @@ public class Flip {
 
     public int getTotalSellPrice() {
         return sellPrice * itemSet.getItemAmount();
+    }
+
+    public String getItemName() {
+        return this.itemSet.getItem().getItemName();
+    }
+
+    public int getItemAmount() {
+        return this.itemSet.getItemAmount();
     }
 
     public int getProfit() {
