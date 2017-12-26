@@ -1,23 +1,25 @@
 package state.ge;
 
 public class PriceCheckResults {
-    private int slot;
     private int price;
+    private int slot;
+    private PlaceOfferResult result;
 
-    public PriceCheckResults(int slot, int price) {
-        this.slot = slot;
+    public PriceCheckResults(PlaceOfferResult result, int price, int slot) {
+        this.result = result;
         this.price = price;
+        this.slot = slot;
     }
 
     public int getPrice() {
         return price;
     }
 
-    public int getSlot() {
-        return slot;
+    public PlaceOfferResult getOfferResult() {
+        return result;
     }
 
-    public boolean successfullyGotPrice() {
-        return price != -1;
+    public int getSlot() {
+        return slot;
     }
 }

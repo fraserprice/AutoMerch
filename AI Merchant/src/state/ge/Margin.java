@@ -4,7 +4,7 @@ public class Margin {
     private int minimum = -1;
     private int maximum = -1;
 
-    private long marginTimeout = 1800000;
+    private long marginTimeout = 600000;
     private long maximumValidUntil = -1;
     private long minimumValidUntil = -1;
 
@@ -21,12 +21,22 @@ public class Margin {
         setMaximum(maximum);
     }
 
-    public boolean minimumValid() {
-        return marginTimeout == -1 || System.currentTimeMillis() < minimumValidUntil;
+    public boolean isMinimumValid() {
+        boolean valid = marginTimeout == -1 || System.currentTimeMillis() < minimumValidUntil;
+        if(!valid) {
+            minimum = -1;
+            minimumValidUntil = -1;
+        }
+        return valid;
     }
 
-    public boolean maximumValid() {
-        return marginTimeout == -1 || System.currentTimeMillis() < maximumValidUntil;
+    public boolean isMaximumValid() {
+        boolean valid = marginTimeout == -1 || System.currentTimeMillis() < maximumValidUntil;
+        if(!valid) {
+            maximum = -1;
+            maximumValidUntil = -1;
+        }
+        return valid;
     }
 
     public int getMinimum() {
@@ -52,6 +62,13 @@ public class Margin {
         this.minimumValidUntil += marginTimeout - this.marginTimeout;
         this.marginTimeout = marginTimeout;
 
+    }
+
+    public void reset() {
+        maximumValidUntil = -1;
+        minimumValidUntil = -1;
+        maximum = -1;
+        minimum = -1;
     }
 }
 

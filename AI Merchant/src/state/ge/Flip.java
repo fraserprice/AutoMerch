@@ -3,12 +3,14 @@ package state.ge;
 import state.ge.items.ItemSet;
 
 public class Flip {
-    private FlipStatus status;
     private ItemSet itemSet;
     private int buyPrice;
     private int sellPrice;
+
     private long maxOfferTime = -1;
+
     private long buyOfferPlacedAt = -1;
+    private long buyOfferFinishedAt = -1;
     private long sellOfferPlacedAt = -1;
     private long flipCompletedAt = -1;
 
@@ -16,7 +18,6 @@ public class Flip {
         this.itemSet = itemSet;
         this.buyPrice = buyPrice;
         this.sellPrice = sellPrice;
-        this.status = FlipStatus.INITIALISED;
     }
 
     public Flip(ItemSet itemSet, int buyPrice, int sellPrice, long maxOfferTime) {
@@ -24,7 +25,13 @@ public class Flip {
         this.buyPrice = buyPrice;
         this.sellPrice = sellPrice;
         this.maxOfferTime = maxOfferTime;
-        this.status = FlipStatus.INITIALISED;
+    }
+
+    public void copyFlipTimes(Flip flip) {
+        buyOfferPlacedAt = flip.getBuyOfferPlacedAt();
+        buyOfferFinishedAt = flip.getBuyOfferFinishedAt();
+        sellOfferPlacedAt = flip.getSellOfferPlacedAt();
+        flipCompletedAt = flip.getFlipCompletedAt();
     }
 
     public int getTotalBuyPrice() {
@@ -99,11 +106,11 @@ public class Flip {
         return maxOfferTime;
     }
 
-    public FlipStatus getStatus() {
-        return status;
+    public long getBuyOfferFinishedAt() {
+        return buyOfferFinishedAt;
     }
 
-    public void setStatus(FlipStatus status) {
-        this.status = status;
+    public void setBuyOfferFinishedAt(long buyOfferFinishedAt) {
+        this.buyOfferFinishedAt = buyOfferFinishedAt;
     }
 }

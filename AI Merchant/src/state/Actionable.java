@@ -1,4 +1,4 @@
-package state.ai;
+package state;
 
 
 /*
@@ -7,7 +7,7 @@ package state.ai;
  *
  *  Agents should pass performAction() to item strategy of highest priority item.
  *
- *  For item strategies, performAction() should interact with its parent agent in order to perform a flip of the given
+ *  For item strategies, performAction() should interact with its parent merchAgent in order to perform a flip of the given
  *  item.
 */
 

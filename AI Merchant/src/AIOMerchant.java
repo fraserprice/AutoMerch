@@ -1,9 +1,10 @@
 import org.dreambot.api.script.AbstractScript;
 import org.dreambot.api.script.Category;
 import org.dreambot.api.script.ScriptManifest;
-import state.ai.Actionable;
-import state.ai.agents.Agent;
-import state.ai.agents.PriorityQueueAgentBuilder;
+import state.Actionable;
+import state.ai.agents.idle_node_agents.AfkIdleAgent;
+import state.ai.agents.merch_node_agents.MerchAgent;
+import state.ai.agents.merch_node_agents.PriorityQueueMerchAgentBuilder;
 import state.ge.GrandExchangeInterface;
 import state.ge.items.Item;
 
@@ -23,26 +24,27 @@ public class AIOMerchant extends AbstractScript {
     @Override
     public void onStart() {
         // TODO: GUI
-        GrandExchangeInterface ge = new GrandExchangeInterface(3);
-        Item bronzeDagger = new Item("Bronze dagger");
-        Item ironArrow = new Item("Iron arrow");
+        GrandExchangeInterface ge = new GrandExchangeInterface(this, 3);
+        Item item1 = new Item("Iron med helm");
+        Item item2 = new Item("Iron warhammer");
         Queue<Item> itemQueue = new LinkedList<>();
-        itemQueue.add(bronzeDagger);
-        itemQueue.add(ironArrow);
-        Agent agent = new PriorityQueueAgentBuilder()
+        itemQueue.add(item1);
+        //itemQueue.add(item2);
+        MerchAgent merchAgent = new PriorityQueueMerchAgentBuilder()
+                .abstractScript(this)
                 .ge(ge)
                 .itemQueue(itemQueue)
                 .build();
-        agentNodes.add(agent);
-        //agentNodes.add(/*TODO: Idle agent*/agent);
-        //agentNodes.add(/*TODO: Exit agent*/agent);
+        agentNodes.add(merchAgent);
+        agentNodes.add(new AfkIdleAgent(this));
+        //agentNodes.add(/*TODO: Exit merchAgent*/merchAgent);
     }
 
     @Override
     public int onLoop() {
-        for(Actionable agent : agentNodes) {
-            if(agent.performAction()) {
-                return 0;
+        for(Actionable agentNode : agentNodes) {
+            if(agentNode.performAction()) {
+                return 500;
             }
         }
         return 500;
