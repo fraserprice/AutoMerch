@@ -6,6 +6,7 @@ import state.ge.*;
 import state.ge.items.Item;
 
 import static org.dreambot.api.methods.MethodProvider.log;
+import static org.dreambot.api.methods.MethodProvider.sleepUntil;
 import static state.ai.agents.item_strategies.ItemStrategy.ItemState.*;
 import static state.ge.PlaceOfferResult.FAILED_TO_PLACE_OFFER;
 import static state.ge.PlaceOfferResult.OFFER_PLACED;
@@ -23,7 +24,7 @@ public class PriceCheckerItemStrategy extends ItemStrategy {
     @Override
     protected boolean handlePCBuyQueued() {
         log("--- Attempting to begin price check for " + item.getItemName() + " ---");
-        if(currentPCValue > priceEstimate * 2) {
+        if(currentPCValue != -1 && priceEstimate != -1 && currentPCValue > priceEstimate * 2) {
             notifyBadItem();
             return false;
         }
@@ -48,10 +49,11 @@ public class PriceCheckerItemStrategy extends ItemStrategy {
 
     @Override
     protected boolean handlePCBuying() {
-        if(ge.offerIsCompleted(slot)) {
-            int collectionValue = ge.collectPCBuyOffer(slot, currentPCValue);
+        sleepUntil(() -> ge.isOfferCompleted(slot), 2000);
+        if(ge.isOfferCompleted(slot)) {
+            int collectionValue = ge.collectPCBuyOffer(slot);
             if(collectionValue != -1) {
-                itemMargin.setMaximum(collectionValue);
+                itemMargin.setMaximum(currentPCValue - collectionValue);
                 slot = -1;
                 currentPCValue = (int) (0.9 * priceEstimate);
                 state = ItemState.PC_BOUGHT;
@@ -85,8 +87,8 @@ public class PriceCheckerItemStrategy extends ItemStrategy {
 
     @Override
     protected boolean handlePCSelling() {
-        if(ge.offerIsCompleted(slot)) {
-            int collectionValue = ge.collectPCBuyOffer(slot, currentPCValue);
+        if(ge.isOfferCompleted(slot)) {
+            int collectionValue = ge.collectPCSellOffer(slot);
             if(collectionValue != -1) {
                 itemMargin.setMinimum(collectionValue);
                 slot = -1;
@@ -94,7 +96,7 @@ public class PriceCheckerItemStrategy extends ItemStrategy {
                 state = ItemState.BUY_QUEUED;
             }
         } else {
-            if(ge.cancelPCBuyOffer(slot)) {
+            if(ge.cancelPCSellOffer(slot)) {
                 currentPCValue = Math.min((int) (0.9 * currentPCValue), currentPCValue - 1);
                 slot = -1;
                 state = PC_BOUGHT;
@@ -118,7 +120,7 @@ public class PriceCheckerItemStrategy extends ItemStrategy {
 
     @Override
     protected boolean handleBuying() {
-        if(ge.offerIsCompleted(slot)) {
+        if(ge.isOfferCompleted(slot)) {
             if(collectBuyOffer()) {
                 state = BOUGHT;
             }
@@ -139,7 +141,7 @@ public class PriceCheckerItemStrategy extends ItemStrategy {
 
     @Override
     protected boolean handleSelling() {
-        if(ge.offerIsCompleted(slot)) {
+        if(ge.isOfferCompleted(slot)) {
             if(collectSellOffer()) {
                 state = SOLD;
             }

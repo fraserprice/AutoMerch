@@ -18,17 +18,16 @@ import java.util.*;
  */
 public abstract class MerchAgent extends AgentNode {
 
-    protected GrandExchangeInterface ge;
+    protected GrandExchangeAPI ge;
     private PriceChecker pc = new PriceChecker(PriceCheckerEndpoint.GE_TRACKER);
 
     private Queue<Item> itemQueue;
     Map<Item, ItemStrategy> itemStrategies = new HashMap<>();
-    private Map<Item, ItemRestrictions> itemRestrictions = new HashMap<>();
 
     private Set<Flip> completedFlips = new HashSet<>();
 
     // TODO: Create builder
-    public MerchAgent(AbstractScript abstractScript, GrandExchangeInterface ge, Queue<Item> itemQueue, Map<Item,
+    public MerchAgent(AbstractScript abstractScript, GrandExchangeAPI ge, Queue<Item> itemQueue, Map<Item,
             ItemRestrictions> itemRestrictions, PriceChecker pc, Map<Item, ItemStrategy> itemStrategies) {
         super(abstractScript);
         this.ge = ge;
@@ -62,7 +61,7 @@ public abstract class MerchAgent extends AgentNode {
         return abstractScript.getInventory().count(995);
     }
 
-    public GrandExchangeInterface getGe() {
+    public GrandExchangeAPI getGe() {
         return ge;
     }
 

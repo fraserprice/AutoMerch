@@ -8,12 +8,13 @@ import state.ge.items.Item;
 import state.ge.items.ItemRestrictions;
 import state.ge.items.ItemSet;
 
+import static org.dreambot.api.methods.MethodProvider.log;
 import static state.ai.agents.item_strategies.ItemStrategy.ItemState.*;
 
 public abstract class ItemStrategy extends AgentNode {
 
     protected final MerchAgent merchAgent;
-    protected final GrandExchangeInterface ge;
+    protected final GrandExchangeAPI ge;
 
     protected final Item item;
     protected ItemRestrictions restrictions = new ItemRestrictions();
@@ -45,9 +46,10 @@ public abstract class ItemStrategy extends AgentNode {
     }
 
     public boolean isWaiting() {
-        return state == IDLE
+        return (state == IDLE
                 && (ge.getAvailableItemAmount(item) > 0 || ge.getAvailableItemAmount(item) == -1)
-                && !restrictions.isBadItem();
+                && !restrictions.isBadItem())
+                || state != IDLE;
     }
 
     /*
@@ -57,8 +59,10 @@ public abstract class ItemStrategy extends AgentNode {
      */
     @Override
     public boolean performAction() {
+        log(item.getItemName() + ": " + state.getMessage());
         switch(state) {
             case IDLE:
+                log(Integer.toString(ge.availableSlotCount()));
                 if(isWaiting() && ge.availableSlotCount() > 0) {
                     if(itemMargin.isMinimumValid() && itemMargin.isMaximumValid()) {
                         state = BUY_QUEUED;
@@ -210,11 +214,26 @@ public abstract class ItemStrategy extends AgentNode {
 
     // Represents all possible flip states for each item. PC = price check
     protected enum ItemState {
-        IDLE,
-        PC_BUY_QUEUED, PC_BUYING, PC_BOUGHT,
-        PC_SELLING,
-        BUY_QUEUED, BUYING, BOUGHT,
-        SELLING, SOLD
+        IDLE("Idle"),
+        PC_BUY_QUEUED("Attempting to buy item for price check"),
+        PC_BUYING("Buying for price check in progress"),
+        PC_BOUGHT("Attempting to sell item for price check"),
+        PC_SELLING("Selling for price check in progress"),
+        BUY_QUEUED("Attempting to place buy offer for new flip"),
+        BUYING("Buying for flip in progress"),
+        BOUGHT("Attempting to sell bought items for flip"),
+        SELLING("Selling for flip in progress"),
+        SOLD("Finished flip!");
+
+        private String message;
+
+        ItemState(String message) {
+            this.message = message;
+        }
+
+        public String getMessage() {
+            return message;
+        }
     }
 
 }

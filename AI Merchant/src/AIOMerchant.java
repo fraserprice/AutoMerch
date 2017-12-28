@@ -1,3 +1,4 @@
+import org.dreambot.api.methods.grandexchange.GrandExchangeItem;
 import org.dreambot.api.script.AbstractScript;
 import org.dreambot.api.script.Category;
 import org.dreambot.api.script.ScriptManifest;
@@ -5,7 +6,7 @@ import state.Actionable;
 import state.ai.agents.idle_node_agents.AfkIdleAgent;
 import state.ai.agents.merch_node_agents.MerchAgent;
 import state.ai.agents.merch_node_agents.PriorityQueueMerchAgentBuilder;
-import state.ge.GrandExchangeInterface;
+import state.ge.GrandExchangeAPI;
 import state.ge.items.Item;
 
 import java.util.LinkedList;
@@ -24,8 +25,8 @@ public class AIOMerchant extends AbstractScript {
     @Override
     public void onStart() {
         // TODO: GUI
-        GrandExchangeInterface ge = new GrandExchangeInterface(this, 3);
-        Item item1 = new Item("Iron med helm");
+        GrandExchangeAPI ge = new GrandExchangeAPI(this, 3);
+        Item item1 = new Item("Bronze dagger");
         Item item2 = new Item("Iron warhammer");
         Queue<Item> itemQueue = new LinkedList<>();
         itemQueue.add(item1);
@@ -37,17 +38,17 @@ public class AIOMerchant extends AbstractScript {
                 .build();
         agentNodes.add(merchAgent);
         agentNodes.add(new AfkIdleAgent(this));
-        //agentNodes.add(/*TODO: Exit merchAgent*/merchAgent);
     }
 
     @Override
     public int onLoop() {
+        log("--------------------");
         for(Actionable agentNode : agentNodes) {
             if(agentNode.performAction()) {
-                return 500;
+                return 250;
             }
         }
-        return 500;
+        return 10000;
     }
 
     @Override

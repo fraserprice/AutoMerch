@@ -11,10 +11,12 @@ import state.ge.items.ItemRestrictions;
 import java.util.Map;
 import java.util.Queue;
 
+import static org.dreambot.api.methods.MethodProvider.log;
+
 public class PriorityQueueMerchAgent extends MerchAgent {
 
 
-    public PriorityQueueMerchAgent(AbstractScript abstractScript, GrandExchangeInterface ge, Queue<Item> itemQueue,
+    public PriorityQueueMerchAgent(AbstractScript abstractScript, GrandExchangeAPI ge, Queue<Item> itemQueue,
                                    Map<Item, ItemRestrictions> itemRestrictionsMap, PriceChecker pc, Map<Item,
             ItemStrategy> itemStrategies) {
         super(abstractScript, ge, itemQueue, itemRestrictionsMap, pc, itemStrategies);
