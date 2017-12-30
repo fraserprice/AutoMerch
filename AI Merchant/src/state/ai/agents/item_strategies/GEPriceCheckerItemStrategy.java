@@ -78,7 +78,6 @@ public class GEPriceCheckerItemStrategy extends ItemStrategy {
         if(ge.isOfferCompleted(slot)) {
             int collectionValue = ge.collectPCBuyOffer(slot);
             if(collectionValue != -1) {
-                log("Collected: " + collectionValue);
                 currentPCBuy -= collectionValue;
                 itemMargin.setMaximum(currentPCBuy);
                 setMinPCSellPrice();
@@ -165,12 +164,10 @@ public class GEPriceCheckerItemStrategy extends ItemStrategy {
     private void setNextPCFraction() {
         int nextIndex = FRACTION_GROWTH.indexOf(currentPCFraction) + 1;
         currentPCFraction = nextIndex >= FRACTION_GROWTH.size() ? -1 : FRACTION_GROWTH.get(nextIndex);
-        log("Next Fraction: " + Double.toString(currentPCFraction));
     }
 
     private void setNextPCBuyPrice() {
         currentPCBuy = (int) (priceEstimate + currentPCFraction * (maxPCBuy - priceEstimate));
-        log("Buy price: " + Integer.toString(currentPCBuy));
         setNextPCFraction();
     }
 
@@ -180,7 +177,6 @@ public class GEPriceCheckerItemStrategy extends ItemStrategy {
         } else {
             currentPCSell = Math.min(currentPCSell - 1, (int) (currentPCBuy - currentPCFraction * (currentPCBuy - minPCSell)));
         }
-        log("Sell price: " + Integer.toString(currentPCSell));
         setNextPCFraction();
     }
 
@@ -192,7 +188,6 @@ public class GEPriceCheckerItemStrategy extends ItemStrategy {
                 + 1.104658938                     * priceEstimate
                 + 2500
         );
-        log("Max buy: " + Integer.toString(maxPCBuy));
     }
 
     private void setMinPCSellPrice() {
@@ -203,7 +198,6 @@ public class GEPriceCheckerItemStrategy extends ItemStrategy {
                 + 1.026246548 * Math.pow(10, -1)  * currentPCBuy
                 + 2500
         ), 1);
-        log("Min sell: " + Integer.toString(minPCSell));
     }
 
     private enum PCState {

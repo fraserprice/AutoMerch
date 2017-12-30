@@ -1,9 +1,12 @@
 package state.ai.agents.item_strategies;
 
 import org.dreambot.api.script.AbstractScript;
+import state.ge.flips.Margin;
 import utils.OSBPriceChecker;
 import state.ai.agents.merch_node_agents.MerchAgent;
 import state.ge.items.Item;
+
+import static state.ai.agents.item_strategies.ItemStrategy.ItemState.BUY_QUEUED;
 
 public class OSBPriceCheckerItemStrategy extends ItemStrategy {
 
@@ -13,7 +16,11 @@ public class OSBPriceCheckerItemStrategy extends ItemStrategy {
 
     @Override
     protected boolean handlePCQueued() {
-        itemMargin = OSBPriceChecker.getCurrentMarginEstimate(item);
-        return false;
+        Margin itemMargin = OSBPriceChecker.getCurrentMarginEstimate(item);
+        if(itemMargin.areBothValid()) {
+            this.itemMargin = itemMargin;
+            state = BUY_QUEUED;
+        }
+        return true;
     }
 }

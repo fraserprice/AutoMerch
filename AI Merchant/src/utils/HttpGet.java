@@ -7,15 +7,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 class HttpGet {
-    private String url;
-    private String responseString;
-
-    public HttpGet(String url) {
-        this.url = url;
-        this.responseString = makeRequest();
-    }
-
-    private String makeRequest() {
+    public static String getRequest(String url) {
         try {
             StringBuilder sb = new StringBuilder();
             URL endpointUrl = new URL(url);
@@ -31,9 +23,5 @@ class HttpGet {
             e.printStackTrace();
             return null;
         }
-    }
-
-    public String getResponseString() {
-        return responseString;
     }
 }

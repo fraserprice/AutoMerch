@@ -6,10 +6,12 @@ public class Item {
 
     public Item(String itemName) {
         this.itemName = itemName;
+        this.itemId = ItemIdLookup.getId(itemName);
     }
 
     public Item(int itemId) {
         this.itemId = itemId;
+        this.itemName = ItemIdLookup.getItemName(itemId);
     }
 
     public String getItemName() {
