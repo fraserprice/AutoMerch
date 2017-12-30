@@ -1,7 +1,7 @@
 import org.dreambot.api.script.AbstractScript;
 import org.dreambot.api.script.Category;
 import org.dreambot.api.script.ScriptManifest;
-import state.Actionable;
+import state.ai.AgentNode;
 import state.ai.agents.idle_node_agents.AfkIdleAgent;
 import state.ai.agents.merch_node_agents.MerchAgent;
 import state.ai.agents.merch_node_agents.PriorityQueueMerchAgentBuilder;
@@ -19,7 +19,7 @@ import java.util.Queue;
         category = Category.MONEYMAKING)
 public class AIOMerchant extends AbstractScript {
 
-    private Queue<Actionable> agentNodes = new LinkedList<>();
+    private Queue<AgentNode> agentNodes = new LinkedList<>();
 
     @Override
     public void onStart() {
@@ -44,7 +44,7 @@ public class AIOMerchant extends AbstractScript {
     @Override
     public int onLoop() {
         log("--------------------");
-        for(Actionable agentNode : agentNodes) {
+        for(AgentNode agentNode : agentNodes) {
             if(agentNode.performAction()) {
                 return 250;
             }

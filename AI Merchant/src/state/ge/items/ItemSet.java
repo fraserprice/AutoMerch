@@ -1,8 +1,5 @@
 package state.ge.items;
 
-/**
- * Class designed to deal with stacks of the same item bought for specific price
- */
 public class ItemSet {
     private final Item item;
     private final int itemAmount;

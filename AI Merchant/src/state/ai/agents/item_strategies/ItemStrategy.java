@@ -1,9 +1,12 @@
 package state.ai.agents.item_strategies;
 
 import org.dreambot.api.script.AbstractScript;
-import state.AgentNode;
+import state.ai.AgentNode;
 import state.ai.agents.merch_node_agents.MerchAgent;
 import state.ge.*;
+import state.ge.flips.Flip;
+import state.ge.flips.Margin;
+import state.ge.flips.OfferCollection;
 import state.ge.items.Item;
 import state.ge.items.ItemRestrictions;
 import state.ge.items.ItemSet;

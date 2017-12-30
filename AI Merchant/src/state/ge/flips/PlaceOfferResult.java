@@ -1,4 +1,4 @@
-package state.ge;
+package state.ge.flips;
 
 public enum PlaceOfferResult {
     MARKET_PRICE_CHECKED("Checked item's market price"),

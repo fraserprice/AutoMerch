@@ -1,11 +1,10 @@
 package state.ai.agents.item_strategies;
 
 import org.dreambot.api.script.AbstractScript;
-import state.Actionable;
 import state.ai.agents.merch_node_agents.MerchAgent;
 import state.ge.items.Item;
 
-class MachineLearningItemStrategy extends ItemStrategy implements Actionable {
+class MachineLearningItemStrategy extends ItemStrategy {
 
     public MachineLearningItemStrategy(AbstractScript abstractScript, MerchAgent merchAgent, Item item) {
         super(abstractScript, merchAgent, item);

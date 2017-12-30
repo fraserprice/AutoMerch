@@ -1,7 +1,5 @@
 package state.ge.items;
 
-import state.ge.Margin;
-
 public class Item {
     private String itemName;
     private int itemId;

@@ -1,4 +1,4 @@
-package state.ge;
+package state.ge.flips;
 
 import state.ge.items.ItemSet;
 

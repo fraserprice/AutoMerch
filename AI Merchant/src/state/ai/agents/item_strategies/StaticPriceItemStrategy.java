@@ -1,12 +1,11 @@
 package state.ai.agents.item_strategies;
 
 import org.dreambot.api.script.AbstractScript;
-import state.Actionable;
 import state.ai.agents.merch_node_agents.MerchAgent;
 import state.ge.items.Item;
-import state.ge.Margin;
+import state.ge.flips.Margin;
 
-class StaticPriceItemStrategy extends ItemStrategy implements Actionable {
+class StaticPriceItemStrategy extends ItemStrategy {
 
     public StaticPriceItemStrategy(AbstractScript abstractScript, MerchAgent merchAgent, Item item, Margin fixedMargin) {
         super(abstractScript, merchAgent, item);

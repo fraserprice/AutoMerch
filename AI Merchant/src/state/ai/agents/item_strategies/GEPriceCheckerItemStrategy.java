@@ -2,7 +2,7 @@ package state.ai.agents.item_strategies;
 
 import org.dreambot.api.script.AbstractScript;
 import state.ai.agents.merch_node_agents.MerchAgent;
-import state.ge.*;
+import state.ge.flips.PriceCheckResults;
 import state.ge.items.Item;
 
 import java.util.Arrays;
@@ -11,7 +11,7 @@ import java.util.List;
 import static org.dreambot.api.methods.MethodProvider.log;
 import static org.dreambot.api.methods.MethodProvider.sleepUntil;
 import static state.ai.agents.item_strategies.ItemStrategy.ItemState.*;
-import static state.ge.PlaceOfferResult.OFFER_PLACED;
+import static state.ge.flips.PlaceOfferResult.OFFER_PLACED;
 
 public class GEPriceCheckerItemStrategy extends ItemStrategy {
 

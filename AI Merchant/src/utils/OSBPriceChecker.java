@@ -1,6 +1,6 @@
 package utils;
 
-import state.ge.Margin;
+import state.ge.flips.Margin;
 import state.ge.items.Item;
 
 public class OSBPriceChecker {

@@ -1,7 +1,7 @@
 package state.ai.agents.merch_node_agents;
 
 import org.dreambot.api.script.AbstractScript;
-import state.Actionable;
+import state.ai.AgentNode;
 import state.ai.agents.item_strategies.ItemStrategy;
 import state.ge.*;
 import state.ge.items.Item;
@@ -22,7 +22,7 @@ public class PriorityQueueMerchAgent extends MerchAgent {
     @Override
     public boolean performAction() {
         for(Item item : getWaitingItemQueue()) {
-            Actionable itemStrategy = itemStrategies.get(item);
+            AgentNode itemStrategy = itemStrategies.get(item);
             if(itemStrategy.performAction()) {
                 return true;
             }

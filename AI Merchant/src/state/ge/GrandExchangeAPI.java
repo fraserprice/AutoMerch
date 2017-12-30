@@ -7,6 +7,9 @@ import org.dreambot.api.methods.grandexchange.GrandExchangeItem;
 import org.dreambot.api.methods.grandexchange.Status;
 import org.dreambot.api.script.AbstractScript;
 import org.dreambot.api.wrappers.widgets.WidgetChild;
+import state.ge.flips.Flip;
+import state.ge.flips.OfferCollection;
+import state.ge.flips.PriceCheckResults;
 import state.ge.items.Item;
 import state.ge.items.ItemSet;
 import state.ge.items.ItemLimitTracker;
@@ -14,7 +17,7 @@ import state.ge.items.ItemLimitTracker;
 import java.util.*;
 
 import static org.dreambot.api.methods.MethodProvider.sleepUntil;
-import static state.ge.PlaceOfferResult.*;
+import static state.ge.flips.PlaceOfferResult.*;
 
 // All public methods should be safe to perform alone (i.e. correctly handle ge interfaces/widgets). No widget/interface
 // checking should be required by caller; high level abstraction es bueno!
