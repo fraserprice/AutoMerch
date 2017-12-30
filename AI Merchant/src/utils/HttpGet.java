@@ -1,4 +1,4 @@
-package services;
+package utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class HttpGet {
+class HttpGet {
     private String url;
     private String responseString;
 

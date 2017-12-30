@@ -22,7 +22,7 @@ public class Margin {
     }
 
     public boolean isMinimumValid() {
-        boolean valid = marginTimeout == -1 || System.currentTimeMillis() < minimumValidUntil;
+        boolean valid = minimum != -1 && (marginTimeout == -1 || System.currentTimeMillis() < minimumValidUntil);
         if(!valid) {
             minimum = -1;
             minimumValidUntil = -1;
@@ -31,7 +31,7 @@ public class Margin {
     }
 
     public boolean isMaximumValid() {
-        boolean valid = marginTimeout == -1 || System.currentTimeMillis() < maximumValidUntil;
+        boolean valid = maximum != -1 && (marginTimeout == -1 || System.currentTimeMillis() < maximumValidUntil);
         if(!valid) {
             maximum = -1;
             maximumValidUntil = -1;

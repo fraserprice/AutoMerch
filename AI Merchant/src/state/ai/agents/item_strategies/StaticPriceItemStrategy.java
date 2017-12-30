@@ -15,22 +15,7 @@ class StaticPriceItemStrategy extends ItemStrategy implements Actionable {
     }
 
     @Override
-    protected boolean handlePCBuyQueued() {
-        return false;
-    }
-
-    @Override
-    protected boolean handlePCBuying() {
-        return false;
-    }
-
-    @Override
-    protected boolean handlePCBought() {
-        return false;
-    }
-
-    @Override
-    protected boolean handlePCSelling() {
+    protected boolean handlePCQueued() {
         return false;
     }
 

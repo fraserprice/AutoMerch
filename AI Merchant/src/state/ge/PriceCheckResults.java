@@ -1,9 +1,9 @@
 package state.ge;
 
 public class PriceCheckResults {
+    private PlaceOfferResult result;
     private int price;
     private int slot;
-    private PlaceOfferResult result;
 
     public PriceCheckResults(PlaceOfferResult result, int price, int slot) {
         this.result = result;

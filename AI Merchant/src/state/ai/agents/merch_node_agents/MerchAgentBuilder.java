@@ -1,8 +1,6 @@
 package state.ai.agents.merch_node_agents;
 
 import org.dreambot.api.script.AbstractScript;
-import services.PriceChecker;
-import services.PriceCheckerEndpoint;
 import state.ai.agents.item_strategies.ItemStrategy;
 import state.ge.GrandExchangeAPI;
 import state.ge.items.Item;
@@ -14,7 +12,6 @@ public abstract class MerchAgentBuilder<T extends MerchAgentBuilder<T>> {
     protected AbstractScript abstractScript;
 
     protected GrandExchangeAPI ge;
-    protected PriceChecker pc = new PriceChecker(PriceCheckerEndpoint.GE_TRACKER);
 
     protected Queue<Item> itemQueue;
     protected Map<Item, ItemStrategy> itemStrategies = new HashMap<>();
@@ -46,11 +43,6 @@ public abstract class MerchAgentBuilder<T extends MerchAgentBuilder<T>> {
                 this.itemRestrictions.put(item, new ItemRestrictions());
             }
         }
-        return getThis();
-    }
-
-    public T priceChecker(PriceChecker pc) {
-        this.pc = pc;
         return getThis();
     }
 

@@ -68,19 +68,13 @@ public abstract class ItemStrategy extends AgentNode {
                         state = BUY_QUEUED;
                         return true;
                     } else {
-                        state = PC_BUY_QUEUED;
+                        state = PC_QUEUED;
                         return true;
                     }
                 }
                 return false;
-            case PC_BUY_QUEUED:
-                return handlePCBuyQueued();
-            case PC_BUYING:
-                return handlePCBuying();
-            case PC_BOUGHT:
-                return handlePCBought();
-            case PC_SELLING:
-                return handlePCSelling();
+            case PC_QUEUED:
+                return handlePCQueued();
             case BUY_QUEUED:
                 return handleBuyQueued();
             case BUYING:
@@ -100,7 +94,7 @@ public abstract class ItemStrategy extends AgentNode {
      * Utility functions to reduce duplication + for abstraction
      */
 
-    protected boolean placeBuyOffer() {
+    private boolean placeBuyOffer() {
         if(flip == null) {
             int availableSlots = ge.availableSlotCount();
             int waitingQueueSize = merchAgent.getWaitingItemQueue().size();
@@ -116,11 +110,11 @@ public abstract class ItemStrategy extends AgentNode {
         return (slot = ge.placeBuyOffer(flip)) != -1;
     }
 
-    protected boolean placeSellOffer() {
+    private boolean placeSellOffer() {
         return (slot = ge.placeSellOffer(flip)) != -1;
     }
 
-    protected boolean collectBuyOffer() {
+    private boolean collectBuyOffer() {
         OfferCollection collection = ge.collectOffer(slot);
         if(collection == null) {
             return false;
@@ -129,7 +123,7 @@ public abstract class ItemStrategy extends AgentNode {
         return true;
     }
 
-    protected boolean collectSellOffer() {
+    private boolean collectSellOffer() {
         OfferCollection collection = ge.collectOffer(slot);
         if(collection == null) {
             return false;
@@ -192,33 +186,76 @@ public abstract class ItemStrategy extends AgentNode {
      * Below methods are all sub-strategies for our item strategy. They should all return a boolean value if action is
      * actually performed. This should be false in the case of failure rather than because conditions are not right for
      * the given sub-strategy (e.g. cannot find suitable margins and so do not commence flip).
+     *
+     * Can be overridden for non-default behaviour.
      */
-    // Place buy offer for item. Margins should be decided by specific policy.
-    protected abstract boolean handlePCBuyQueued();
 
-    protected abstract boolean handlePCBuying();
+    protected abstract boolean handlePCQueued();
 
-    protected abstract boolean handlePCBought();
+    protected void resetItem() {
+        slot = -1;
+        flip = null;
+        state = IDLE;
+    }
 
-    protected abstract boolean handlePCSelling();
+    protected boolean handleBuyQueued() {
+        if(ge.getAvailableItemAmount(item) > 0 || ge.getAvailableItemAmount(item) == -1) {
+            if(placeBuyOffer()) {
+                state = ItemState.BUYING;
+            }
+        } else {
+            notifyBadItem();
+            return false;
+        }
+        return true;
+    }
 
-    protected abstract boolean handleBuyQueued();
+    protected boolean handleBuying() {
+        if(ge.isOfferCompleted(slot)) {
+            if(collectBuyOffer()) {
+                state = ItemState.BOUGHT;
+            }
+        } else if(System.currentTimeMillis() > flip.getBuyOfferPlacedAt() + flip.getMaxOfferTime()) {
+            // TODO: Handle timeout
+            return false;
+        }
+        return true;
+    }
 
-    protected abstract boolean handleBuying();
+    protected boolean handleBought() {
+        if(placeSellOffer()) {
+            state = ItemState.SELLING;
+        }
+        return true;
+    }
 
-    protected abstract boolean handleBought();
+    protected boolean handleSelling() {
+        if(ge.isOfferCompleted(slot)) {
+            if(collectSellOffer()) {
+                state = SOLD;
+            }
+        } else if(System.currentTimeMillis() > flip.getSellOfferPlacedAt() + flip.getMaxOfferTime()) {
+            // TODO: Handle timeout
+            return false;
+        }
+        return true;
+    }
 
-    protected abstract boolean handleSelling();
+    protected boolean handleSold() {
+        merchAgent.addCompletedFlip(flip);
+        resetItem();
+        return true;
+    }
 
-    protected abstract boolean handleSold();
+    void notifyBadItem() {
+        restrictions.notifyBadFlip();
+        resetItem();
+    }
 
     // Represents all possible flip states for each item. PC = price check
     protected enum ItemState {
         IDLE("Idle"),
-        PC_BUY_QUEUED("Attempting to buy item for price check"),
-        PC_BUYING("Buying for price check in progress"),
-        PC_BOUGHT("Attempting to sell item for price check"),
-        PC_SELLING("Selling for price check in progress"),
+        PC_QUEUED("Attempting to perform price check"),
         BUY_QUEUED("Attempting to place buy offer for new flip"),
         BUYING("Buying for flip in progress"),
         BOUGHT("Attempting to sell bought items for flip"),

@@ -1,6 +1,5 @@
-package state.ge.limit;
+package state.ge.items;
 
-import org.dreambot.api.methods.MethodProvider;
 import state.ge.items.Item;
 import state.ge.items.ItemSet;
 
@@ -9,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class LimitTracker {
+public class ItemLimitTracker {
     private Map<String, TransactionHistory> itemsBuyHistory = new HashMap<>();
 
     public int getAvailableAmount(Item item) {

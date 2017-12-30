@@ -1,4 +1,3 @@
-import org.dreambot.api.methods.grandexchange.GrandExchangeItem;
 import org.dreambot.api.script.AbstractScript;
 import org.dreambot.api.script.Category;
 import org.dreambot.api.script.ScriptManifest;
@@ -26,11 +25,13 @@ public class AIOMerchant extends AbstractScript {
     public void onStart() {
         // TODO: GUI
         GrandExchangeAPI ge = new GrandExchangeAPI(this, 3);
-        Item item1 = new Item("Bronze dagger");
+        Item item1 = new Item("Iron arrow");
         Item item2 = new Item("Iron warhammer");
+        Item item3 = new Item("Rune scimitar");
         Queue<Item> itemQueue = new LinkedList<>();
         itemQueue.add(item1);
         //itemQueue.add(item2);
+        //itemQueue.add(item3);
         MerchAgent merchAgent = new PriorityQueueMerchAgentBuilder()
                 .abstractScript(this)
                 .ge(ge)

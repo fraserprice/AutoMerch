@@ -1,11 +1,9 @@
 package state.ai.agents.merch_node_agents;
 
 import org.dreambot.api.script.AbstractScript;
-import services.PriceChecker;
-import services.PriceCheckerEndpoint;
 import state.AgentNode;
 import state.ai.agents.item_strategies.ItemStrategy;
-import state.ai.agents.item_strategies.PriceCheckerItemStrategy;
+import state.ai.agents.item_strategies.GEPriceCheckerItemStrategy;
 import state.ge.*;
 import state.ge.items.Item;
 import state.ge.items.ItemRestrictions;
@@ -19,7 +17,6 @@ import java.util.*;
 public abstract class MerchAgent extends AgentNode {
 
     protected GrandExchangeAPI ge;
-    private PriceChecker pc = new PriceChecker(PriceCheckerEndpoint.GE_TRACKER);
 
     private Queue<Item> itemQueue;
     Map<Item, ItemStrategy> itemStrategies = new HashMap<>();
@@ -28,15 +25,14 @@ public abstract class MerchAgent extends AgentNode {
 
     // TODO: Create builder
     public MerchAgent(AbstractScript abstractScript, GrandExchangeAPI ge, Queue<Item> itemQueue, Map<Item,
-            ItemRestrictions> itemRestrictions, PriceChecker pc, Map<Item, ItemStrategy> itemStrategies) {
+            ItemRestrictions> itemRestrictions, Map<Item, ItemStrategy> itemStrategies) {
         super(abstractScript);
         this.ge = ge;
         this.itemQueue = itemQueue;
-        this.pc = pc;
         for(Item item : itemQueue) {
             ItemRestrictions restrictions = itemRestrictions.containsKey(item) ? itemRestrictions.get(item) : new ItemRestrictions();
             ItemStrategy strategy = itemStrategies.containsKey(item) ? itemStrategies.get(item)
-                    : new PriceCheckerItemStrategy(abstractScript, this, item, 2.0, 0.3);
+                    : new GEPriceCheckerItemStrategy(abstractScript, this, item);
             strategy.setRestrictions(restrictions);
             this.itemStrategies.put(item, strategy);
         }

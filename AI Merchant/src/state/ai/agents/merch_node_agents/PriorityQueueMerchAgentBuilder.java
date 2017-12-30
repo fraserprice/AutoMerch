@@ -7,6 +7,6 @@ public class PriorityQueueMerchAgentBuilder extends MerchAgentBuilder<PriorityQu
     }
 
     public PriorityQueueMerchAgent build() {
-        return new PriorityQueueMerchAgent(abstractScript, ge, itemQueue, itemRestrictions, pc, itemStrategies);
+        return new PriorityQueueMerchAgent(abstractScript, ge, itemQueue, itemRestrictions, itemStrategies);
     }
 }
