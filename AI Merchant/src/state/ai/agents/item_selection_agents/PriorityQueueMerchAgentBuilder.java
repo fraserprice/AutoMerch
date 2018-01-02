@@ -1,4 +1,4 @@
-package state.ai.agents.merch_node_agents;
+package state.ai.agents.item_selection_agents;
 
 public class PriorityQueueMerchAgentBuilder extends MerchAgentBuilder<PriorityQueueMerchAgentBuilder> {
     @Override

@@ -1,4 +1,4 @@
-package state.ai.agents.idle_node_agents;
+package state.ai.agents.idle_agents;
 
 import org.dreambot.api.script.AbstractScript;
 import state.ai.AgentNode;

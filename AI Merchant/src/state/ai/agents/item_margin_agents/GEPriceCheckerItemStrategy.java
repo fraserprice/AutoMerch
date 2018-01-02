@@ -1,8 +1,8 @@
-package state.ai.agents.item_strategies;
+package state.ai.agents.item_margin_agents;
 
 import org.dreambot.api.script.AbstractScript;
-import state.ai.agents.merch_node_agents.MerchAgent;
-import state.ge.flips.PriceCheckResults;
+import state.ai.agents.item_selection_agents.MerchAgent;
+import state.ge.utils.PriceCheckResults;
 import state.ge.items.Item;
 
 import java.util.Arrays;
@@ -10,11 +10,12 @@ import java.util.List;
 
 import static org.dreambot.api.methods.MethodProvider.log;
 import static org.dreambot.api.methods.MethodProvider.sleepUntil;
-import static state.ai.agents.item_strategies.ItemStrategy.ItemState.*;
-import static state.ge.flips.PlaceOfferResult.OFFER_PLACED;
+import static state.ai.agents.item_margin_agents.ItemStrategy.ItemState.*;
+import static state.ge.utils.PlaceOfferResult.OFFER_PLACED;
 
 public class GEPriceCheckerItemStrategy extends ItemStrategy {
 
+    // TODO: Randomize/improve
     private final List<Double> FRACTION_GROWTH = Arrays.asList(0.0, 0.05, 0.15, 0.35, 0.6, 1.0);
     private PCState pcState = PCState.BUY_QUEUED;
     private int priceEstimate = -1;
@@ -158,6 +159,7 @@ public class GEPriceCheckerItemStrategy extends ItemStrategy {
      *
      * This strategy should hold well for suitable ge price-check (i.e. high-volume) items; low-volume items should use
      * osbuddy or static price.
+     *
      */
 
     // Returns double to multiply (max - current) or (current - min) by to obtain next PC price

@@ -1,18 +1,18 @@
-package state.ai.agents.item_strategies;
+package state.ai.agents.item_margin_agents;
 
 import org.dreambot.api.script.AbstractScript;
 import state.ai.AgentNode;
-import state.ai.agents.merch_node_agents.MerchAgent;
+import state.ai.agents.item_selection_agents.MerchAgent;
 import state.ge.*;
-import state.ge.flips.Flip;
-import state.ge.flips.Margin;
-import state.ge.flips.OfferCollection;
+import state.ge.utils.Flip;
+import state.ge.utils.Margin;
+import state.ge.utils.OfferCollection;
 import state.ge.items.Item;
 import state.ge.items.ItemRestrictions;
 import state.ge.items.ItemSet;
 
 import static org.dreambot.api.methods.MethodProvider.log;
-import static state.ai.agents.item_strategies.ItemStrategy.ItemState.*;
+import static state.ai.agents.item_margin_agents.ItemStrategy.ItemState.*;
 
 public abstract class ItemStrategy extends AgentNode {
 
@@ -146,7 +146,7 @@ public abstract class ItemStrategy extends AgentNode {
      *       alternatively re-check price and sell item.
      *
      * 2. Sell offer: TODO: Alter buy time for each flip to avoid inaccuracy?
-     *     - Create two new flips.
+     *     - Create two new utils.
      *     - i.  Flip containing number of items successfully sold. Add this flip to completed flip list.
      *     - ii. Flip containing number of items still unsold. We return this flip so merchAgent can decide what action to
      *           take next.

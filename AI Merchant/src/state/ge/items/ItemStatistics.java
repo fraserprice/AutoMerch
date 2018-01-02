@@ -10,15 +10,16 @@ public class ItemStatistics {
     private final int overallPrice;
     private final int overallCompleted;
 
-    // Parameters must be of length 6 and be ordered as defined in ParameterIndices
-    public ItemStatistics(long timestamp, int[] parameters) {
+    public ItemStatistics(long timestamp, int buyingPrice, int buyingCompleted, int sellingPrice, int sellingCompleted,
+                          int overallPrice, int overallCompleted) {
+
         this.timestamp = timestamp;
-        this.buyingPrice = parameters[ParameterIndices.BP_INDEX.ordinal()];
-        this.buyingCompleted = parameters[ParameterIndices.BC_INDEX.ordinal()];
-        this.sellingPrice = parameters[ParameterIndices.SP_INDEX.ordinal()];
-        this.sellingCompleted = parameters[ParameterIndices.SC_INDEX.ordinal()];
-        this.overallPrice = parameters[ParameterIndices.OP_INDEX.ordinal()];
-        this.overallCompleted = parameters[ParameterIndices.OC_INDEX.ordinal()];
+        this.buyingPrice = buyingPrice;
+        this.buyingCompleted = buyingCompleted;
+        this.sellingPrice = sellingPrice;
+        this.sellingCompleted = sellingCompleted;
+        this.overallPrice = overallPrice;
+        this.overallCompleted = overallCompleted;
     }
 
     public long getTimestamp() {
@@ -47,10 +48,6 @@ public class ItemStatistics {
 
     public int getOverallCompleted() {
         return overallCompleted;
-    }
-
-    private enum ParameterIndices {
-        BP_INDEX, BC_INDEX, SP_INDEX, SC_INDEX, OP_INDEX, OC_INDEX
     }
 
 }

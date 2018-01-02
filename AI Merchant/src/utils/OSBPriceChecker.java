@@ -1,17 +1,16 @@
 package utils;
 
-import state.ge.flips.Margin;
+import state.ge.utils.Margin;
 import state.ge.items.Item;
 import state.ge.items.ItemStatistics;
+import state.ge.items.ItemStatisticsBuilder;
 
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class OSBPriceChecker {
     private static final String OSBUDDY_API_URL = "https://api.rsbuddy.com/grandExchange?a=graph&g=30&i=";
-    private static final int ITEM_STATISTICS_PARAMETER_COUNT = 6;
 
     public static Queue<ItemStatistics> getRecentItemStatistics(Item item) {
         int itemId = item.getItemId();
@@ -56,6 +55,7 @@ public class OSBPriceChecker {
     }
 
     private static ItemStatistics parseSingleStatistic(String json) {
+        ItemStatisticsBuilder isb = new ItemStatisticsBuilder();
         String[] variableNames = {
                 "ts",
                 "buyingPrice",
@@ -65,29 +65,62 @@ public class OSBPriceChecker {
                 "overallPrice",
                 "overallCompleted"
         };
-        List<Matcher> matchers = Arrays.stream(variableNames)
-                .map(OSBPriceChecker::getJsonRegexPattern)
-                .map(Pattern::compile)
-                .map(pattern -> pattern.matcher(json))
-                .collect(Collectors.toList());
-        List<String> statisticValues = new LinkedList<>();
-        for(Matcher m : matchers) {
-            if(m.find()) {
-                statisticValues.add(m.group(0));
-            } else {
-                statisticValues.add("-1");
-            }
+        Map<StatisticParameter, String> matches = Arrays.stream(StatisticParameter.values())
+                .collect(Collectors.toMap(
+                        sp -> sp,
+                        sp -> Pattern.compile(OSBPriceChecker.getJsonRegexPattern(sp.getKey())).matcher(json)))
+                .entrySet().stream().filter(entry -> entry.getValue().find())
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().group(0)));
+        for(Map.Entry<StatisticParameter, String> match : matches.entrySet()) {
+            StatisticParameter sp = match.getKey();
+            String valueString = match.getValue();
+            sp.setParameter(isb, valueString);
         }
-        Iterator<String> i = statisticValues.iterator();
-        Long ts = Long.parseLong(i.next());
-        int[] params = new int[ITEM_STATISTICS_PARAMETER_COUNT];
-        for(int index = 0; index < ITEM_STATISTICS_PARAMETER_COUNT; index++) {
-            params[index] = Integer.parseInt(i.next());
-        }
-        return new ItemStatistics(ts, params);
+        return isb.build();
     }
 
     private static String getJsonRegexPattern(String variableName) {
         return "\"" + variableName + "\":(\\d+),";
+    }
+
+    private enum StatisticParameter {
+        TS("ts"), BUYING_PRICE("buyingPrice"), BUYING_COMPLETED("buyingCompleted"), SELLING_PRICE("sellingPrice"),
+        SELLING_COMPLETED("sellingCompleted"), OVERALL_PRICE("overallPrice"), OVERALL_COMPLETD("overallCompleted");
+
+        private String key;
+
+        StatisticParameter(String key) {
+            this.key = key;
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public void setParameter(ItemStatisticsBuilder isb, String valueString) {
+            switch (key) {
+                case "ts":
+                    isb.setTs(Long.parseLong(valueString));
+                    break;
+                case "buyingPrice":
+                    isb.setBuyingPrice(Integer.parseInt(valueString));
+                    break;
+                case "buyingCompleted":
+                    isb.setBuyingCompleted(Integer.parseInt(valueString));
+                    break;
+                case "sellingPrice":
+                    isb.setSellingPrice(Integer.parseInt(valueString));
+                    break;
+                case "sellingCompleted":
+                    isb.setSellingCompleted(Integer.parseInt(valueString));
+                    break;
+                case "overallPrice":
+                    isb.setOverallPrice(Integer.parseInt(valueString));
+                    break;
+                case "overallCompleted":
+                    isb.setOverallCompleted(Integer.parseInt(valueString));
+            }
+
+        }
     }
 }

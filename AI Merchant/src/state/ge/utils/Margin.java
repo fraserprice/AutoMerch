@@ -1,4 +1,4 @@
-package state.ge.flips;
+package state.ge.utils;
 
 public class Margin {
     private int minimum = -1;

@@ -11,7 +11,8 @@ public class ItemIdLookup {
     public static int getId(String itemName) {
         Set<Map.Entry<Integer, String>> items = ITEM_ID_MAP.entrySet()
                 .stream()
-                .filter(e -> e.getValue().equals(itemName)).collect(Collectors.toSet());
+                .filter(e -> e.getValue().equals(itemName))
+                .collect(Collectors.toSet());
         if(items.size() > 1) {
             return -1;
         }

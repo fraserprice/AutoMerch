@@ -1,13 +1,13 @@
-package state.ai.agents.merch_node_agents;
+package state.ai.agents.item_selection_agents;
 
 import org.dreambot.api.script.AbstractScript;
 import state.ai.AgentNode;
-import state.ai.agents.item_strategies.ItemStrategy;
-import state.ai.agents.item_strategies.GEPriceCheckerItemStrategy;
+import state.ai.agents.item_margin_agents.ItemStrategy;
+import state.ai.agents.item_margin_agents.GEPriceCheckerItemStrategy;
 import state.ge.*;
-import state.ge.flips.Flip;
 import state.ge.items.Item;
 import state.ge.items.ItemRestrictions;
+import state.ge.utils.Flip;
 
 import java.util.*;
 

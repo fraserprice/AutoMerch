@@ -1,12 +1,12 @@
-package state.ai.agents.item_strategies;
+package state.ai.agents.item_margin_agents;
 
 import org.dreambot.api.script.AbstractScript;
-import state.ge.flips.Margin;
+import state.ge.utils.Margin;
 import utils.OSBPriceChecker;
-import state.ai.agents.merch_node_agents.MerchAgent;
+import state.ai.agents.item_selection_agents.MerchAgent;
 import state.ge.items.Item;
 
-import static state.ai.agents.item_strategies.ItemStrategy.ItemState.BUY_QUEUED;
+import static state.ai.agents.item_margin_agents.ItemStrategy.ItemState.BUY_QUEUED;
 
 public class OSBPriceCheckerItemStrategy extends ItemStrategy {
 

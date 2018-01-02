@@ -2,9 +2,9 @@ import org.dreambot.api.script.AbstractScript;
 import org.dreambot.api.script.Category;
 import org.dreambot.api.script.ScriptManifest;
 import state.ai.AgentNode;
-import state.ai.agents.idle_node_agents.AfkIdleAgent;
-import state.ai.agents.merch_node_agents.MerchAgent;
-import state.ai.agents.merch_node_agents.PriorityQueueMerchAgentBuilder;
+import state.ai.agents.idle_agents.AfkIdleAgent;
+import state.ai.agents.item_selection_agents.MerchAgent;
+import state.ai.agents.item_selection_agents.PriorityQueueMerchAgentBuilder;
 import state.ge.GrandExchangeAPI;
 import state.ge.items.Item;
 
