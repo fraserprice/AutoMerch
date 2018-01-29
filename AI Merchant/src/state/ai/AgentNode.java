@@ -1,6 +1,7 @@
 package state.ai;
 
 import org.dreambot.api.script.AbstractScript;
+import utils.ScriptData;
 
 /*
  *  Interface to be used by agent nodes. Boolean performAction() returns true if an action was indeed performed.
@@ -12,10 +13,10 @@ import org.dreambot.api.script.AbstractScript;
  *  Usage should be specific to each IdleAgent node.
 */
 public abstract class AgentNode {
-    protected AbstractScript abstractScript;
+    protected ScriptData scriptData;
 
-    public AgentNode(AbstractScript abstractScript) {
-        this.abstractScript = abstractScript;
+    public AgentNode(ScriptData scriptData) {
+        this.scriptData = scriptData;
     }
 
     public abstract boolean performAction();

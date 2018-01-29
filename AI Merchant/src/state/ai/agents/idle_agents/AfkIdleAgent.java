@@ -1,6 +1,7 @@
 package state.ai.agents.idle_agents;
 
 import org.dreambot.api.script.AbstractScript;
+import utils.ScriptData;
 
 import java.util.Random;
 
@@ -11,15 +12,14 @@ public class AfkIdleAgent extends IdleAgent {
     private Random random = new Random();
     private long nextMovementTime = getNextMovementTime();
 
-    public AfkIdleAgent(AbstractScript abstractScript) {
-        super(abstractScript);
+    public AfkIdleAgent(ScriptData scriptData) {
+        super(scriptData);
     }
 
     @Override
     public boolean performAction() {
-        log(Long.toString(nextMovementTime - System.currentTimeMillis()));
         if(System.currentTimeMillis() > nextMovementTime) {
-            abstractScript.getCamera().rotateTo(random.nextInt(360), random.nextInt(360));
+            scriptData.getAbstractScript().getCamera().rotateTo(random.nextInt(360), random.nextInt(360));
             nextMovementTime = getNextMovementTime();
         }
         return true;

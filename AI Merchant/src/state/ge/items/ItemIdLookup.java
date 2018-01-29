@@ -13,7 +13,7 @@ public class ItemIdLookup {
                 .stream()
                 .filter(e -> e.getValue().equals(itemName))
                 .collect(Collectors.toSet());
-        if(items.size() > 1) {
+        if(items.size() > 1 || items.size() == 0) {
             return -1;
         }
         return items.iterator().next().getKey();
@@ -25,6 +25,7 @@ public class ItemIdLookup {
 
     private static Map<Integer, String> ITEM_ID_MAP = new HashMap<>();
 
+    // TODO: Move to db + webserver
     static {
         ITEM_ID_MAP.put(2, "Cannonball");
         ITEM_ID_MAP.put(6, "Cannon base");

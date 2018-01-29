@@ -1,8 +1,5 @@
 package state.ge.items;
 
-import state.ge.items.Item;
-import state.ge.items.ItemSet;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,12 +15,13 @@ public class ItemLimitTracker {
     public int getAvailableAmount(String itemName) {
         long MILLIS_IN_4H = 14400000;
         int itemLimit = LIMIT_MAP.get(itemName);
-        if(itemsBuyHistory.get(itemName) == null || itemLimit == -1) {
-            return LIMIT_MAP.get(itemName);
-        } else {
-            int amountBoughtIn4h = itemsBuyHistory.get(itemName).getAmountBought(MILLIS_IN_4H);
-            return itemLimit - amountBoughtIn4h;
+        if(itemLimit == -1) {
+            itemLimit = 2147483647;
         }
+        TransactionHistory history = itemsBuyHistory.get(itemName);
+        int amountBoughtIn4h = history == null ? 0 : history.getAmountBought(MILLIS_IN_4H);
+
+        return itemLimit - amountBoughtIn4h;
     }
 
     public void addBuyTransaction(ItemSet items) {
@@ -71,6 +69,7 @@ public class ItemLimitTracker {
     }
 
 
+    // TODO: Move to db + webserver
     private static Map<String, Integer> LIMIT_MAP = new HashMap<String, Integer>() {{
         put("3rd age amulet",-1);
         put("3rd age axe",-1);

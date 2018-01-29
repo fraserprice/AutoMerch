@@ -5,6 +5,7 @@ import state.ge.items.Item;
 import state.ge.items.ItemStatistics;
 import state.ge.items.ItemStatisticsBuilder;
 
+import java.sql.Time;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -36,7 +37,11 @@ public class OSBPriceChecker {
     public static Margin getCurrentMarginEstimate(Item item) {
         ItemStatistics currentStatistics = getCurrentItemStatistics(item);
         if(currentStatistics != null) {
-            return new Margin(currentStatistics.getSellingPrice(), currentStatistics.getBuyingPrice());
+            int min = Math.min(currentStatistics.getBuyingPrice(), currentStatistics.getSellingPrice());
+            int max = Math.max(currentStatistics.getBuyingPrice(), currentStatistics.getSellingPrice());
+            Margin margin = new Margin(min, max);
+            margin.setValidUntil(TimeScheduler.getNextOSBUpdateTime());
+            return margin;
         }
         return new Margin();
     }
@@ -70,7 +75,7 @@ public class OSBPriceChecker {
                         sp -> sp,
                         sp -> Pattern.compile(OSBPriceChecker.getJsonRegexPattern(sp.getKey())).matcher(json)))
                 .entrySet().stream().filter(entry -> entry.getValue().find())
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().group(0)));
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().group(1)));
         for(Map.Entry<StatisticParameter, String> match : matches.entrySet()) {
             StatisticParameter sp = match.getKey();
             String valueString = match.getValue();

@@ -1,19 +1,21 @@
 package state.ai.agents.item_margin_agents;
 
 import org.dreambot.api.script.AbstractScript;
-import state.ai.agents.item_selection_agents.MerchAgent;
+import state.ge.utils.Margin;
 import state.ge.utils.PriceCheckResults;
 import state.ge.items.Item;
+import utils.ScriptData;
+import utils.ScriptStatus;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static org.dreambot.api.methods.MethodProvider.log;
 import static org.dreambot.api.methods.MethodProvider.sleepUntil;
-import static state.ai.agents.item_margin_agents.ItemStrategy.ItemState.*;
+import static state.ai.agents.item_margin_agents.MarginAgent.ItemState.*;
 import static state.ge.utils.PlaceOfferResult.OFFER_PLACED;
 
-public class GEPriceCheckerItemStrategy extends ItemStrategy {
+public class GEPriceCheckerMarginAgent extends MarginAgent {
 
     // TODO: Randomize/improve
     private final List<Double> FRACTION_GROWTH = Arrays.asList(0.0, 0.05, 0.15, 0.35, 0.6, 1.0);
@@ -25,21 +27,26 @@ public class GEPriceCheckerItemStrategy extends ItemStrategy {
     private int currentPCSell = -1;
     private double currentPCFraction = 0.05;
 
-    public GEPriceCheckerItemStrategy(AbstractScript abstractScript, MerchAgent merchAgent, Item item) {
-        super(abstractScript, merchAgent, item);
+    public GEPriceCheckerMarginAgent(ScriptData scriptData, Item item, int undercutPercentage) {
+        super(scriptData, item, undercutPercentage);
     }
+
 
     @Override
     protected boolean handlePCQueued() {
         log(item.getItemName() + ": " + pcState.getMessage());
         switch(pcState) {
             case BUY_QUEUED:
+                scriptData.setStatus(ScriptStatus.PC_BUY_QUEUED);
                 return handlePCBuyQueued();
             case BUYING:
+                scriptData.setStatus(ScriptStatus.PC_BUYING);
                 return handlePCBuying();
             case BOUGHT:
+                scriptData.setStatus(ScriptStatus.PC_BOUGHT);
                 return handlePCBought();
             case SELLING:
+                scriptData.setStatus(ScriptStatus.PC_SELLING);
                 return handlePCSelling();
         }
         return true;
@@ -50,7 +57,7 @@ public class GEPriceCheckerItemStrategy extends ItemStrategy {
             notifyBadItem();
             return false;
         }
-        PriceCheckResults result = ge.placePCBuyOffer(item, merchAgent.getAvailableGold(), currentPCBuy);
+        PriceCheckResults result = ge.placePCBuyOffer(item, getAvailableGold(), currentPCBuy);
         log(result.getOfferResult().getMessage());
         if(result.getSlot() != -1) {
             slot = result.getSlot();
@@ -144,6 +151,7 @@ public class GEPriceCheckerItemStrategy extends ItemStrategy {
         maxPCBuy = -1;
         minPCSell = -1;
         currentPCFraction = 0.05;
+        itemMargin = new Margin();
         flip = null;
         state = IDLE;
     }

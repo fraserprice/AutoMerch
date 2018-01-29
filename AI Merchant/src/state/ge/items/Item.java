@@ -21,4 +21,9 @@ public class Item {
     public int getItemId() {
         return itemId;
     }
+
+    @Override
+    public String toString() {
+        return getItemName();
+    }
 }

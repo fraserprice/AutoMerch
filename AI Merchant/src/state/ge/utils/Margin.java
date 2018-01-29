@@ -26,7 +26,7 @@ public class Margin {
     }
 
     public boolean isMinimumValid() {
-        boolean valid = minimum != -1 && (marginTimeout == -1 || System.currentTimeMillis() < minimumValidUntil);
+        boolean valid = minimum != -1 && (minimumValidUntil == -1 || System.currentTimeMillis() < minimumValidUntil);
         if(!valid) {
             minimum = -1;
             minimumValidUntil = -1;
@@ -35,7 +35,7 @@ public class Margin {
     }
 
     public boolean isMaximumValid() {
-        boolean valid = maximum != -1 && (marginTimeout == -1 || System.currentTimeMillis() < maximumValidUntil);
+        boolean valid = maximum != -1 && (maximumValidUntil == -1 || System.currentTimeMillis() < maximumValidUntil);
         if(!valid) {
             maximum = -1;
             maximumValidUntil = -1;
@@ -66,6 +66,11 @@ public class Margin {
         this.minimumValidUntil += marginTimeout - this.marginTimeout;
         this.marginTimeout = marginTimeout;
 
+    }
+
+    public void setValidUntil(long timestamp) {
+        this.maximumValidUntil = timestamp;
+        this.minimumValidUntil = timestamp;
     }
 
     public void reset() {

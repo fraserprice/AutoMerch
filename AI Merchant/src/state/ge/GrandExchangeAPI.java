@@ -16,6 +16,7 @@ import state.ge.items.ItemLimitTracker;
 
 import java.util.*;
 
+import static org.dreambot.api.methods.MethodProvider.sleep;
 import static org.dreambot.api.methods.MethodProvider.sleepUntil;
 import static state.ge.utils.PlaceOfferResult.*;
 
@@ -105,9 +106,12 @@ public class GrandExchangeAPI {
     }
 
     public int placeBuyOffer(Flip flip) {
-        int slot = placeBuyOffer(flip.getItemName(), flip.getItemAmount(), flip.getBuyPrice());
-        if(slot != -1) {
-            flip.setBuyOfferPlacedAt(System.currentTimeMillis());
+        int slot = -1;
+        if(flip != null) {
+            slot = placeBuyOffer(flip.getItemName(), flip.getItemAmount(), flip.getBuyPrice());
+            if(slot != -1) {
+                flip.setBuyOfferPlacedAt(System.currentTimeMillis());
+            }
         }
         return slot;
     }
@@ -125,9 +129,12 @@ public class GrandExchangeAPI {
     }
 
     public int placeSellOffer(Flip flip) {
-        int slot = placeSellOffer(flip.getItemName(), flip.getItemAmount(), flip.getSellPrice());
-        if(slot != -1) {
-            flip.setSellOfferPlacedAt(System.currentTimeMillis());
+        int slot = -1;
+        if(flip != null) {
+            slot = placeSellOffer(flip.getItemName(), flip.getItemAmount(), flip.getSellPrice());
+            if(slot != -1) {
+                flip.setSellOfferPlacedAt(System.currentTimeMillis());
+            }
         }
         return slot;
     }
@@ -210,19 +217,19 @@ public class GrandExchangeAPI {
             slot = dreambotGe.getFirstOpenSlot();
             if(slot != -1) {
                 dreambotGe.openSellScreen(slot);
-                sleepUntil(dreambotGe::isSellOpen, 2000);
+                sleepUntil(dreambotGe::isSellOpen, 4000);
             }
         }
         if(dreambotGe.isSellOpen()) {
             if(!isItemSelected(item)) {
                 dreambotGe.addSellItem(item.getItemName());
-                sleepUntil(() -> isItemSelected(item), 2000);
+                sleepUntil(() -> isItemSelected(item), 4000);
             }
 
             if(isItemSelected(item)) {
                 // Return market price
                 dreambotGe.sellItem(item.getItemName(), 1, sellPrice);
-                sleepUntil(this::isExchangeInterfaceOpen, 2000);
+                sleepUntil(this::isExchangeInterfaceOpen, 4000);
             }
             return new PriceCheckResults(isExchangeInterfaceOpen() ? OFFER_PLACED : FAILED_TO_PLACE_OFFER, sellPrice, slot);
         }
@@ -248,7 +255,7 @@ public class GrandExchangeAPI {
             int slot = dreambotGe.getFirstOpenSlot();
             if(slot != -1 && !slotContainsItem(slot)) {
                 dreambotGe.openBuyScreen(slot);
-                sleepUntil(dreambotGe::isBuyOpen, 2000);
+                sleepUntil(dreambotGe::isBuyOpen, 4000);
                 if(dreambotGe.isBuyOpen()) {
                     return slot;
                 }
@@ -268,7 +275,7 @@ public class GrandExchangeAPI {
             int slot = dreambotGe.getFirstOpenSlot();
             if(slot != -1 && !slotContainsItem(slot)) {
                 dreambotGe.openSellScreen(slot);
-                sleepUntil(dreambotGe::isSellOpen, 2000);
+                sleepUntil(dreambotGe::isSellOpen, 4000);
                 if(dreambotGe.isSellOpen()) {
                     return slot;
                 }
@@ -285,7 +292,7 @@ public class GrandExchangeAPI {
         if(dreambotGe.isBuyOpen()) {
             if (!isItemSelected(item)) {
                 dreambotGe.addBuyItem(item.getItemName());
-                sleepUntil(() -> isItemSelected(item), 2000);
+                sleepUntil(() -> isItemSelected(item), 4000);
             }
             if(isItemSelected(item)) {
                 int price = dreambotGe.getCurrentPrice();
@@ -303,7 +310,7 @@ public class GrandExchangeAPI {
         if(dreambotGe.isSellOpen()) {
             if (!isItemSelected(item)) {
                 dreambotGe.addSellItem(item.getItemName());
-                sleepUntil(() -> isItemSelected(item), 2000);
+                sleepUntil(() -> isItemSelected(item), 4000);
             }
             if(isItemSelected(item)) {
                 int price = dreambotGe.getCurrentPrice();
@@ -322,6 +329,7 @@ public class GrandExchangeAPI {
         if(isCurrentOfferInterfaceOpen()) {
             WidgetChild itemStack = GrandExchangeWidget.COLLECTION_SQUARE_1.getWidgetChild(abstractScript);
             WidgetChild coins = GrandExchangeWidget.COLLECTION_SQUARE_2.getWidgetChild(abstractScript);
+            sleep(1000, 1500);
             if(itemStack != null && itemStack.isVisible()) {
                 int previousAmountOfItems = getAmountInInventory(itemName);
                 int previousNumberOfCoins = getAmountInInventory("Coins");
@@ -373,18 +381,18 @@ public class GrandExchangeAPI {
                 if(isNewOfferInterfaceOpen() || isCurrentOfferInterfaceOpen()) {
                     WidgetChild backButton = GrandExchangeWidget.BACK_BUTTON.getWidgetChild(abstractScript);
                     backButton.interact("Back");
-                    sleepUntil(this::isExchangeInterfaceOpen, 2000);
+                    sleepUntil(this::isExchangeInterfaceOpen, 4000);
                     return isExchangeInterfaceOpen();
                 } else if(dreambotGe.close()) {
                     dreambotGe.open();
-                    sleepUntil(this::isExchangeInterfaceOpen, 2000);
+                    sleepUntil(this::isExchangeInterfaceOpen, 4000);
                     return isExchangeInterfaceOpen();
                 } else {
                     return openExchangeInterface();
                 }
             } else {
                 dreambotGe.open();
-                sleepUntil(this::isExchangeInterfaceOpen, 2000);
+                sleepUntil(this::isExchangeInterfaceOpen, 4000);
                 return isExchangeInterfaceOpen();
             }
         } else {
@@ -396,12 +404,11 @@ public class GrandExchangeAPI {
         if(!isSlotCurrentOfferInterfaceOpen(slot)) {
             if(openExchangeInterface()) {
                 dreambotGe.openSlotInterface(slot);
-                sleepUntil(() -> isSlotCurrentOfferInterfaceOpen(slot), 4000);
+                sleepUntil(() -> isSlotCurrentOfferInterfaceOpen(slot), 5000);
             }
             return openSlotCurrentOfferInterface(slot);
-        } else {
-            return true;
         }
+        return true;
     }
 
     private int getAmountInInventory(String itemName) {
@@ -421,7 +428,7 @@ public class GrandExchangeAPI {
     private boolean isCurrentBuyOfferInterfaceOpen() {
         if(isCurrentOfferInterfaceOpen()) {
             WidgetChild offerType = GrandExchangeWidget.CURRENT_OFFER_INTERFACE_TYPE.getWidgetChild(abstractScript);
-            return offerType != null && offerType.isVisible() && offerType.getText().equals("Buy offer");
+            return offerType != null && offerType.isVisible() && offerType.getText().equals(BUY_OFFER_TEXT);
         }
         return false;
     }

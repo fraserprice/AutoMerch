@@ -34,6 +34,10 @@ public class Flip {
         flipCompletedAt = flip.getFlipCompletedAt();
     }
 
+    public void setItemAmount(int amount) {
+        itemSet = new ItemSet(itemSet.getItem(), amount);
+    }
+
     public int getTotalBuyPrice() {
         return buyPrice * itemSet.getItemAmount();
     }
